@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                  String                   @id @default(auto()) @map("_id") @db.ObjectId
+  title               String                   @unique
+  vacancies           Vacancy[]
+}
+
+model Vacancy {
+  id                  String                   @id @default(auto()) @map("_id") @db.ObjectId
+  title               String
+  salaryFork          String
+  company             Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId           String                   @db.ObjectId
+  jobApplications     JobApplication[]     
+}
+
+model Candidate {
+  id                  String                   @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  surname             String
+  jobApplications     JobApplication[]
+}
+
+model JobApplication {
+  id                  String                   @id @default(auto()) @map("_id") @db.ObjectId
+  status              JobApplicationStatus     @default(REVIEW)
+  note                String?
+  vacancy             Vacancy                  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  vacancyId           String                   @db.ObjectId
+  candidate           Candidate                @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidateId         String                   @db.ObjectId
+}
+
+enum JobApplicationStatus {
+  REVIEW
+  INVITED
+  REJECTED
+  HIRED
+}
